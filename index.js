@@ -24,8 +24,6 @@ export const app = express().use(express.json());
 app.post("/mobs", async (req, res) => {
 	const { type, x, y, z } = req.body;
 
-	console.log(type, x, y, z, "DEBUUUG");
-
 	if (!type || x === undefined || y === undefined || z === undefined)
 		return res.sendStatus(400);
 
