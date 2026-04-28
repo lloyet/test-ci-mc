@@ -1,16 +1,10 @@
-import { describe, test, after, before } from "node:test";
+import { describe, test, after } from "node:test";
 import assert from "node:assert/strict";
 
 import request from "supertest";
 import { app, server, rcon } from "../index.js";
 
 describe("TEST /mobs", () => {
-	before(async () => {
-		await new Promise((resolve) => {
-			setTimeout(() => resolve(), 2000);
-		});
-	});
-
 	after(() => {
 		server.close();
 		rcon.end();
