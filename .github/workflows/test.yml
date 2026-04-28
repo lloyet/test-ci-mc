@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Start PaperMC server
+        run: docker compose up -d
+
       - name: Setup Node.js ${{ matrix.node-version}}
         uses: actions/setup-node@v4
         with:
@@ -29,5 +32,15 @@ jobs:
       - name: Install depedencies
         run: npm ci
 
+      - name: Wait for RCON to be ready
+        run: |
+          echo "Waiting for PaperMC RCON on port 25575..."
+          timeout 120 bash -c 'until nc -z localhost 25575; do sleep 2; done'
+          echo "RCON is up"
+
       - name: Run tests
         run: npm test
+
+      - name: Stop PaperMC server
+        if: always()
+        run: docker compose down
