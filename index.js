@@ -7,7 +7,7 @@ import { Rcon } from "rcon-client";
 export let rcon;
 
 Rcon.connect({
-	host: "0.0.0.0",
+	host: "localhost",
 	port: 25575,
 	password: "1234",
 }).then((connection) => {
