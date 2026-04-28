@@ -21,6 +21,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Start PaperMC server
+        run: docker compose up -d --build
+
       - name: Setup Node.js ${{ matrix.node-version}}
         uses: actions/setup-node@v4
         with:
@@ -31,3 +34,7 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Stop PaperMC server
+        if: always()
+        run: docker compose down

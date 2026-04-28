@@ -1,39 +1,79 @@
 import express from "express";
 import { Rcon } from "rcon-client";
 
+const HOST = process.env.HOST ?? "0.0.0.0";
+const PORT = Number.parseInt(process.env.PORT ?? "3000");
+const RCON_HOST = process.env.RCON_HOST ?? "0.0.0.0";
+const RCON_PORT = Number.parseInt(process.env.RCON_PORT ?? "25575");
+const RCON_PASSWORD = process.env.RCON_PASSWORD ?? "1234";
+
 /**
- * @type {Rcon}
+ * @type {Rcon | null}
  */
-let rcon;
+export let rcon = null;
+let reconnecting = false;
 
-Rcon.connect({
-	host: "0.0.0.0",
-	port: 25575,
-	password: "1234",
-}).then((connection) => {
-	console.log("[RCON] Connected at 0.0.0.0:25575.");
-	rcon = connection;
+function scheduleReconnect() {
+	if (reconnecting) return;
 
-	rcon.on("end", () => {
-		console.log("[RCON] Disconnected from 0.0.0.0:25575.");
-	});
-});
+	reconnecting = true;
+	rcon = null;
+
+	setTimeout(async () => {
+		reconnecting = false;
+		await getRcon();
+	}, 2000);
+}
+
+async function getRcon() {
+	if (rcon?.authenticated) return rcon;
+
+	try {
+		const newRcon = new Rcon({
+			host: RCON_HOST,
+			port: RCON_PORT,
+			password: RCON_PASSWORD,
+			timeout: 0,
+		});
+
+		newRcon.on("error", (err) => {
+			console.log(`[RCON] Error ${err} from ${RCON_HOST}:${RCON_PORT}.`);
+			scheduleReconnect();
+		});
+
+		newRcon.on("end", () => {
+			console.log(`[RCON] Disconnected from ${RCON_HOST}:${RCON_PORT}.`);
+			scheduleReconnect();
+		});
+
+		await newRcon.connect();
+		rcon = newRcon;
+		console.log(`[RCON] Connected at ${RCON_HOST}:${RCON_PORT}.`);
+	} catch {
+		console.log(`[RCON] Timeout Try reconnect at ${RCON_HOST}:${RCON_PORT}`);
+		scheduleReconnect();
+	}
+
+	return rcon;
+}
 
 export const app = express().use(express.json());
 
 app.post("/mobs", async (req, res) => {
 	const { type, x, y, z } = req.body;
 
-	console.log(type, x, y, z, "DEBUUUG");
-
 	if (!type || x === undefined || y === undefined || z === undefined)
 		return res.sendStatus(400);
 
-	const rconResponse = await rcon.send(`summon ${type} ${x} ${y} ${z}`);
+	const rconClient = await getRcon();
+
+	const rconResponse = await rconClient.send(`summon ${type} ${x} ${y} ${z}`);
 
 	res.status(201).send(rconResponse);
 });
 
-app.listen(3000, () => {
-	console.log("Server is running on http://localhost:3000");
+export const server = app.listen(PORT, HOST, () => {
+	console.log(`Server is running on http://${HOST}:${PORT}`);
+
+	getRcon();
 });

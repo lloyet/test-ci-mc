@@ -2,12 +2,19 @@ services:
   minecraft-papermc:
     container_name: minecraft-papermc
     restart: unless-stopped
-    image: "marctv/minecraft-papermc-server:1.21.11-130"
+    image: "itzg/minecraft-server:java21"
     ports:
       - 25565:25565
       - 25575:25575
     environment:
-      - MEMORYSIZE=1G
+      - MEMORY=1G
+      - EULA=TRUE
+      - TYPE=PAPER
+      - VERSION=1.21.11
+      - ENABLE_RCON=TRUE
+      - RCON_PORT=25575
+      - RCON_PASSWORD=1234
+      - BROADCAST_RCON_TO_OPS=FALSE
     volumes:
       - ./data:/data:rw
     # The following allow `docker attach minecraft` to work
