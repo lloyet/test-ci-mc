@@ -4,7 +4,7 @@ import { Rcon } from "rcon-client";
 /**
  * @type {Rcon}
  */
-let rcon;
+export let rcon;
 
 Rcon.connect({
 	host: "0.0.0.0",
@@ -32,6 +32,6 @@ app.post("/mobs", async (req, res) => {
 	res.status(201).send(rconResponse);
 });
 
-app.listen(3000, () => {
+export const server = app.listen(3000, () => {
 	console.log("Server is running on http://localhost:3000");
 });

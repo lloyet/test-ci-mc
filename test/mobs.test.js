@@ -1,11 +1,16 @@
-import { describe, it } from "node:test";
+import { describe, test, after } from "node:test";
 import assert from "node:assert/strict";
 
 import request from "supertest";
-import { app } from "../index.js";
+import { app, server, rcon } from "../index.js";
 
 describe("TEST /mobs", () => {
-	it("test POST /mobs", async () => {
+	after(() => {
+		server.close();
+		rcon.end();
+	});
+
+	test("test POST /mobs", async () => {
 		const response = await request(app)
 			.post("/mobs")
 			.send({
