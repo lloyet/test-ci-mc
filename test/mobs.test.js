@@ -4,20 +4,26 @@ import assert from "node:assert/strict";
 import request from "supertest";
 import { app, server, rcon } from "../index.js";
 
+function wait(delay = 2000) {
+	return new Promise((resolve) => {
+		setTimeout(() => resolve(), 2000);
+	});
+}
+
 describe("TEST /mobs", () => {
-	function tryGetRconConnect() {
+	async function tryGetRconConnect() {
 		if (rcon?.authenticated) return;
 
-		setTimeout(() => tryGetRconConnect(), 2000);
+		await wait(2000);
+		await tryGetRconConnect();
 	}
 
-	before(() => {
-		tryGetRconConnect();
+	before(async () => {
+		await tryGetRconConnect();
 	});
 
 	after(() => {
-		server.close();
-		rcon.end();
+		process.exit(0);
 	});
 
 	test("test POST /mobs", async () => {

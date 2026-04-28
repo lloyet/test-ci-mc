@@ -32,9 +32,6 @@ jobs:
       - name: Install depedencies
         run: npm ci
 
-      - name: Wait for PaperMC to be ready
-        run: sleep 5
-
       - name: Run tests
         run: npm test
 
