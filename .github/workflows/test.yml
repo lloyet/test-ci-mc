@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Start PaperMC server
-        run: docker compose up -d
+        run: docker compose up --build
 
       - name: Setup Node.js ${{ matrix.node-version}}
         uses: actions/setup-node@v4
